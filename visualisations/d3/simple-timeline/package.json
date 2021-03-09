@@ -9,8 +9,10 @@
   "author": "",
   "license": "UNLICENCED",
   "dependencies": {
-    "@types/moment": "^2.13.0",
     "d3": "^6.5.0",
     "moment": "^2.29.1"
+  },
+  "devDependencies": {
+    "@types/moment": "^2.13.0"
   }
 }
