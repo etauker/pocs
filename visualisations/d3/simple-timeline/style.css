@@ -1,7 +1,38 @@
 .container {
-    border: 1px solid red;
+    border: 3px solid green;
 }
 
 .bar {
-    fill: red;
+    /* outline: 1px solid red; */
+    fill: #d2e9be;
+}
+
+.line {
+    stroke: black;
+    stroke-width: 1px;
+}
+
+.period {
+
+    /* outline: 1px solid black; */
+  /* fill: grey; */
+  fill: none;;
+  /* border-left: 1px solid black; */
+  /* stroke: black; */
+  /* stroke-width: 1px; */
+  /* stroke-dasharray: 2,2; */
+  /* stroke-linejoin: round; */
+}
+
+/* .period {
+    fill: none;
+    border-left: 1px black;
+    border-right: 1px black;
+} */
+
+.text {
+    text-align: center;
+    text-anchor: middle;
+    /* overflow-y: hidden; */
+    dominant-baseline: middle;
 }
