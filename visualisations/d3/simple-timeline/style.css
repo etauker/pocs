@@ -13,43 +13,27 @@
 }
 
 .period {
-
-    /* outline: 1px solid black; */
-  /* fill: grey; */
   fill: none;;
-  /* border-left: 1px solid black; */
-  /* stroke: black; */
-  /* stroke-width: 1px; */
-  /* stroke-dasharray: 2,2; */
-  /* stroke-linejoin: round; */
 }
-
-/* .period {
-    fill: none;
-    border-left: 1px black;
-    border-right: 1px black;
-} */
 
 .text {
     text-align: center;
     text-anchor: middle;
-    /* overflow-y: hidden; */
     dominant-baseline: middle;
     z-index: -1;
-    /* z-index: -1; */
 }
 
 .tooltip {
-    background-color: grey;
+    background-color: rgb(228, 228, 228);
     padding: 10px;
     border-radius: 6px;
     position: absolute;
     visibility: hidden;
     pointer-events: none;
+    text-align: center;
 }
 
 .hover {
     width: 100%;
     height: 100%;
-    /* z-index: -1; */
 }

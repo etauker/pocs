@@ -4,6 +4,8 @@ class Period {
     fill
     annotation1
     annotation2
+    hideTooltipAnnotation1; // internal use
+    hideTooltipAnnotation2; // internal use
 }
 
 const DAY_DURATION_MS = 24 * 60 * 60 * 1000;
@@ -19,6 +21,7 @@ class SimpleTimeline {
     _tooltip;
 
     constructor(svgId, data) {
+        data = JSON.parse(JSON.stringify(data));
         this._container = d3.select(`#${svgId}`);
         this._svg = document.getElementById(svgId);
         const days = this._findDays(data);
@@ -34,7 +37,6 @@ class SimpleTimeline {
             throw new Error('svg component must have "width" and "height" properties set');
         }
 
-
         this._scaleX = d3.scaleLinear()
             .domain([0, DAY_DURATION_MS])
             .range([0, this._maxWidth]);
@@ -45,26 +47,34 @@ class SimpleTimeline {
             .padding(0.3);
 
         this._days = this._container
-            .selectAll('.bar') // select all ".bar" elements inside the container
-            .data(days) // set the data
-            .enter() // get data entries that do not yet have an HTML element
-            .append('rect') // for each one, create a new "rect" element
-            .classed('bar', true) // add a "bar" class to each
-            .attr('width', data => this._scaleX(data.end - data.start)) // width evenly distributed across x domain entries
-            .attr('height', this._scaleY.bandwidth()) // this._scales height based on the item value and the y domain
-            .attr('x', data => (data.start % DAY_DURATION_MS) / DAY_DURATION_MS * this._maxWidth) // x axis position
-            .attr('y', data => this._scaleY(data.annotation1)); // y axis band
-        
+            .selectAll('.bar')
+            .data(days)
+            .enter()
+            .append('rect')
+            .classed('bar', true)
+            .attr('width', data => this._scaleX(data.end - data.start))
+            .attr('height', this._scaleY.bandwidth())
+            .attr('x', data => (data.start % DAY_DURATION_MS) / DAY_DURATION_MS * this._maxWidth)
+            .attr('y', data => this._scaleY(data.annotation1))
+
         this._periods = this._container
             .selectAll('.period')
             .data(data)
             .enter();
+
+
+        // TODO: generalise
+        this._tooltip = d3.select("#my_dataviz")
+            .append("div")
+            .classed('tooltip', true);
+
 
         this._styleContainer();
         this._formatPeriods();
         this._addBoundaries(this._periods)
         this._addFill(this._periods)
         this._addAnnotations(this._periods)
+
     }
 
     _styleContainer = function() {
@@ -81,16 +91,43 @@ class SimpleTimeline {
     }
 
     _formatPeriods = function() {
+        console.log('formatting time periods...');
+        const instance = this;
         this._periods
             .append('rect')
             .classed('bar', true)
             .attr('width', data => this._scaleX(data.end - data.start))
             .attr('height', this._scaleY.bandwidth())
             .attr('x', data => (data.start % DAY_DURATION_MS) / DAY_DURATION_MS * this._maxWidth)
-            .attr('y', data => this._scaleY(data.annotation1));
+            .attr('y', data => this._scaleY(data.annotation1))
+            .on('mouseover', function (event, period) {
+                let show = false;
+
+                if (!period.hideTooltipAnnotation1) {
+                    show = true;
+                    instance._tooltip.append('div').text(period.annotation1);
+                }
+                if (!period.hideTooltipAnnotation2) {
+                    show = true;
+                    instance._tooltip.append('div').text(period.annotation2);
+                }
+                if (show) {
+                    return instance._tooltip.style('visibility', 'visible');
+                }
+
+            })
+            .on('mousemove', function (event, period) {
+                return instance._tooltip.style('top', (event.pageY)+'px').style('left',(event.pageX)+'px');
+            })
+            .on('mouseout', function () {
+                instance._tooltip.text('');
+                return instance._tooltip.style('visibility', 'hidden');
+            });
     }
 
+    // HELPER METHODS
     _addBoundaries = function(periodComponents) {
+        console.log('adding period boundaries...');
         periodComponents
             .append('line')
             .classed('line', true)
@@ -109,6 +146,7 @@ class SimpleTimeline {
     }
 
     _addFill = function(periodComponents) {
+        console.log('adding period fill...');
         periodComponents
             .append('line')
             .classed('line', true)
@@ -119,6 +157,9 @@ class SimpleTimeline {
     }
 
     _addAnnotations = function(periodComponents) {
+        console.log('adding annotations...');
+        const instance = this;
+
         periodComponents
             .append('text')
             .classed('text', true)
@@ -128,10 +169,11 @@ class SimpleTimeline {
             .attr('dx', data => (data.end - data.start) / DAY_DURATION_MS * this._maxWidth / 2)
             .text(data => data.annotation1)
             .text(function(data) {
-                const componentWidth = ((data.end - data.start) / DAY_DURATION_MS * this._maxWidth);
-                if (this.getComputedTextLength() > componentWidth) {
+                if (this.getComputedTextLength() > instance._getPeriodWidth(data)) {
+                    data.hideTooltipAnnotation1 = false;
                     return '';
                 }
+                data.hideTooltipAnnotation1 = true;
                 return data.annotation1;
             })
 
@@ -144,22 +186,26 @@ class SimpleTimeline {
             .attr('dx', data => (data.end - data.start) / DAY_DURATION_MS * this._maxWidth / 2)
             .text(data => data.annotation2)
             .text(function(data) {
-                const componentWidth = ((data.end - data.start) / DAY_DURATION_MS * this._maxWidth);
-                if (this.getComputedTextLength() > componentWidth) {
+                if (this.getComputedTextLength() > instance._getPeriodWidth(data)) {
+                    data.hideTooltipAnnotation2 = false;
                     return '';
                 }
+                data.hideTooltipAnnotation2 = true;
                 return data.annotation2;
             })
     }
 
-    // HELPER METHODS
+    _getPeriodWidth(data) {
+        return ((data.end - data.start) / DAY_DURATION_MS * this._maxWidth);
+    }
+
     _findDays = function(periods) {
         const earliestTimestamp = periods.map(val => val.start).sort((val1, val2) => val1 - val2)[0];
         const latestTimestamp = periods.map(val => val.end).sort((val1, val2) => val2 - val1)[0];
-        const count = Math.ceil((latestTimestamp - earliestTimestamp) / DAY_DURATION_MS);
+        const dayCount = Math.ceil((latestTimestamp - earliestTimestamp) / DAY_DURATION_MS);
 
         const days = [];
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < dayCount; i++) {
             const timestamp = earliestTimestamp + (DAY_DURATION_MS * i);
             const dayStart = moment(timestamp).set({
                 hour:0,
