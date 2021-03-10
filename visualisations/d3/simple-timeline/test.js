@@ -27,6 +27,6 @@ const PERIODS = [
     }
 ];
 
-
 const timeline = new SimpleTimeline('visual', PERIODS);
+timeline.test();
 

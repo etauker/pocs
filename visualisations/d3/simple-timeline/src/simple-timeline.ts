@@ -1,7 +1,10 @@
 export class SimpleTimeline {
     
     constructor() {
-        // to test
-        console.log('building');   
+        console.log('building');
+    }
+
+    public test() {
+        console.log('testing'); 
     }
 }

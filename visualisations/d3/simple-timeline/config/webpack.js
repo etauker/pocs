@@ -2,11 +2,12 @@ const path = require('path');
 
 module.exports = {
     context: __dirname,
-    entry: './src/index.ts',
+    entry: '../src/index.ts',
+    devtool: 'inline-source-map',
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, '..', 'dist'),
         filename: 'bundle.js',
-        publicPath: '/dist'
+        libraryTarget: 'umd',
     },
     module: {
         rules: [{
