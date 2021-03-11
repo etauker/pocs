@@ -1,4 +1,8 @@
 const path = require('path');
+const MomentTimezoneDataPlugin = require('moment-timezone-data-webpack-plugin');
+const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
+const currentYear = new Date().getFullYear();
+
 
 module.exports = {
     context: __dirname,
@@ -20,5 +24,12 @@ module.exports = {
     },
     resolve: {
         extensions: ['.ts']
-    }
+    },
+    plugins: [
+        new MomentLocalesPlugin(),
+        new MomentTimezoneDataPlugin({
+            startYear: currentYear - 2,
+            endYear: currentYear,
+        }),
+    ]
 }
