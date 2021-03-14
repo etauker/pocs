@@ -1,12 +1,5 @@
 import { Annotation, AnnotationInternal } from 'annotation.interface';
-import { PeriodFillStyle } from 'period-fill.interface';
-
-export interface PeriodStyle {
-    fillStyle?: PeriodFillStyle;
-    fillColour?: string;
-    backgroundColour?: string;
-    lineWidth?: number;
-}
+import { PeriodStyle } from 'period-style.interface';
 
 export interface Period {
     start: number;

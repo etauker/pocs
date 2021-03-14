@@ -4,9 +4,10 @@ import * as d3 from 'd3';
 import { Period, PeriodInternal } from './period.interface';
 import { ScaleBand, ScaleLinear } from 'd3';
 import { Annotation, AnnotationInternal } from 'annotation.interface';
-import { PeriodFillStyle } from './period-fill.interface';
+import { PeriodFillStyle } from './period-fill.type';
+import { TimelanesConfiguration } from 'timelanes-configuration.interface';
 
-export class SimpleTimeline {
+export class TimelanesGraphic {
 
     private DEFAULT_PERIOD_BACKGROUND_COLOR = 'none';
     private DEFAULT_PERIOD_FILL_COLOR = 'black';
@@ -29,7 +30,7 @@ export class SimpleTimeline {
     private tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
     private periodSelection: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>;
     
-    constructor(svgId: string, data: Period[]) {
+    constructor(svgId: string, data: Period[], configuration: TimelanesConfiguration) {
         this.data = this.processInput(JSON.parse(JSON.stringify(data)));
         this.container = this.getContainer(svgId);
         this.svg = this.getSvg(svgId);
@@ -167,7 +168,7 @@ export class SimpleTimeline {
     }
 
     private addAnnotations(periodComponents: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
-        const instance: SimpleTimeline = this;
+        const instance: TimelanesGraphic = this;
 
         periodComponents
             .append('text')

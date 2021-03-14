@@ -59,5 +59,5 @@ const PERIODS = [
     }
 ];
 
-const timeline = new SimpleTimeline('visual', PERIODS);
+const timeline = new TimelanesGraphic('visual', PERIODS);
 
