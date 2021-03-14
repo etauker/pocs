@@ -3,5 +3,5 @@ export interface Annotation {
 }
 
 export interface AnnotationInternal extends Annotation {
-    hidden: boolean;
+    hidden?: boolean;
 }

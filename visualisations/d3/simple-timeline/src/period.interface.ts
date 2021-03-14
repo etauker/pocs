@@ -1,4 +1,4 @@
-import { Annotation } from 'annotation.interface';
+import { Annotation, AnnotationInternal } from 'annotation.interface';
 import { PeriodFill } from 'period-fill.interface';
 
 export interface Period {
@@ -11,4 +11,6 @@ export interface Period {
 
 export interface PeriodInternal extends Period {
     group: string;
+    annotation1: AnnotationInternal;
+    annotation2: AnnotationInternal;
 }
