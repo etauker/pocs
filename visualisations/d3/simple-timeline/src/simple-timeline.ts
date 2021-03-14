@@ -4,9 +4,14 @@ import * as d3 from 'd3';
 import { Period, PeriodInternal } from './period.interface';
 import { ScaleBand, ScaleLinear } from 'd3';
 import { Annotation, AnnotationInternal } from 'annotation.interface';
-import { PeriodFill } from './period-fill.interface';
+import { PeriodFillStyle } from './period-fill.interface';
 
 export class SimpleTimeline {
+
+    private DEFAULT_PERIOD_BACKGROUND_COLOR = 'none';
+    private DEFAULT_PERIOD_FILL_COLOR = 'black';
+    private DEFAULT_ANNOTATION_TEXT_COLOR = 'black';
+    private DEFAULT_LINE_WIDTH = 2;
 
     private DAY_DURATION_MS = 24 * 60 * 60 * 1000;
     private container: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
@@ -81,7 +86,7 @@ export class SimpleTimeline {
         container.classed('container', true);
     }
 
-    private formatPeriods(periodSelection: any) {
+    private formatPeriods(periodSelection: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
         const instance = this;
 
         periodSelection
@@ -90,7 +95,8 @@ export class SimpleTimeline {
             .attr('width', (data: PeriodInternal) => this.scaleX(data.end - data.start))
             .attr('height', this.scaleY.bandwidth())
             .attr('x', (data: PeriodInternal) => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y', (data: PeriodInternal) => this.scaleY(data.group))
+            .attr('y', (data: PeriodInternal) => this.scaleY(data.group) || null)
+            .style('fill', (data: PeriodInternal) => data.style?.backgroundColour || this.DEFAULT_PERIOD_BACKGROUND_COLOR)
             .on('mouseover', function (event: any, period: PeriodInternal) {
                 let show = false;
 
@@ -118,35 +124,49 @@ export class SimpleTimeline {
             });
     }
 
-    private addBoundaries(periodComponents: any) {
+    private addBoundaries(periodComponents: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
         periodComponents
             .append('line')
             .classed('line', true)
             .attr('x1', (data: PeriodInternal) => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y1', (data: PeriodInternal) => this.scaleY(data.group))
+            .attr('y1', (data: PeriodInternal) => this.scaleY(data.group) || null)
             .attr('x2', (data: PeriodInternal) => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
             .attr('y2', (data: PeriodInternal) => (this.scaleY(data.group) || 0) + this.scaleY.bandwidth())
+            .style('stroke', (data: PeriodInternal) => data.style?.fillColour || this.DEFAULT_PERIOD_FILL_COLOR)
+            .style('stroke-width', (data: PeriodInternal) => data.style?.lineWidth || this.DEFAULT_LINE_WIDTH)
 
         periodComponents
             .append('line')
             .classed('line', true)
             .attr('x1', (data: PeriodInternal) => (data.end % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y1', (data: PeriodInternal) => this.scaleY(data.group))
+            .attr('y1', (data: PeriodInternal) => this.scaleY(data.group) || null)
             .attr('x2', (data: PeriodInternal) => (data.end % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
             .attr('y2', (data: PeriodInternal) => (this.scaleY(data.group) || 0) + this.scaleY.bandwidth())
-    }
+            .style('stroke', (data: PeriodInternal) => data.style?.fillColour || this.DEFAULT_PERIOD_FILL_COLOR)
+            .style('stroke-width', (data: PeriodInternal) => data.style?.lineWidth || this.DEFAULT_LINE_WIDTH)
+        }
 
-    private addFill(periodComponents: any) {
+    private addFill(periodComponents: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
         periodComponents
             .append('line')
-            .classed('line', true)
+            .classed('fill-line-solid', (data: PeriodInternal) => data.style?.fillStyle === 'line-solid')
+            .classed('fill-line-dashed', (data: PeriodInternal) => data.style?.fillStyle === 'line-dashed')
+            .classed('fill-none', (data: PeriodInternal) => data.style?.fillStyle === 'none')
             .attr('x1', (data: PeriodInternal) => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
             .attr('y1', (data: PeriodInternal) => (this.scaleY(data.group) || 0) + this.scaleY.bandwidth() / 2)
             .attr('x2', (data: PeriodInternal) => (data.end % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
             .attr('y2', (data: PeriodInternal) => (this.scaleY(data.group) || 0) + this.scaleY.bandwidth() / 2)
+            .style('stroke', (data: PeriodInternal) => {
+                if (data.style?.fillStyle === 'none') {
+                    return 0;
+                }
+                return data.style?.fillColour || this.DEFAULT_PERIOD_FILL_COLOR;
+            })
+            .style('stroke-width', (data: PeriodInternal) => data.style?.lineWidth || this.DEFAULT_LINE_WIDTH)
+
     }
 
-    private addAnnotations(periodComponents: any) {
+    private addAnnotations(periodComponents: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
         const instance: SimpleTimeline = this;
 
         periodComponents
@@ -157,6 +177,7 @@ export class SimpleTimeline {
             .attr('width', (data: PeriodInternal) => (data.end - data.start) / 2 * this.componentWidth)
             .attr('dx', (data: PeriodInternal) => (data.end - data.start) / this.DAY_DURATION_MS * this.componentWidth / 2)
             .text((data: PeriodInternal) => data.annotation1.text)
+            .style('fill', (data: PeriodInternal) => data.annotation1.textColor || this.DEFAULT_ANNOTATION_TEXT_COLOR)
             .text(function(data: PeriodInternal) {
                 if (this.getComputedTextLength() > instance.getPeriodWidth(data)) {
                     data.annotation1.hidden = false;
@@ -170,10 +191,11 @@ export class SimpleTimeline {
             .append('text')
             .classed('text', true)
             .attr('x', (data: PeriodInternal) => ((data.start % this.DAY_DURATION_MS)) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y', (data: PeriodInternal) => (this.scaleY(data.group) || 0) + (this.scaleY.bandwidth() / 4 * 3))
+            .attr('y', (data: PeriodInternal) => (this.scaleY(data.group) || 0) + (this.scaleY.bandwidth() / 4 * 3) + (data.style?.lineWidth || this.DEFAULT_LINE_WIDTH))
             .attr('width', (data: PeriodInternal) => (data.end - data.start) / 2 * this.componentWidth)
             .attr('dx', (data: PeriodInternal) => (data.end - data.start) / this.DAY_DURATION_MS * this.componentWidth / 2)
-            .text((data: PeriodInternal) => data.annotation2)
+            .text((data: PeriodInternal) => data.annotation2.text)
+            .style('fill', (data: PeriodInternal) => data.annotation1.textColor || this.DEFAULT_ANNOTATION_TEXT_COLOR)
             .text(function(data: PeriodInternal) {
                 if (this.getComputedTextLength() > instance.getPeriodWidth(data)) {
                     data.annotation2.hidden = false;
@@ -230,7 +252,9 @@ export class SimpleTimeline {
             return {
                 start: dayStart.valueOf(),
                 end: dayEnd.valueOf(),
-                fill: 'none' as PeriodFill,
+                style: {
+                    fillStyle: 'none' as PeriodFillStyle,
+                },
                 group: `${dayStart.format('dddd')} (${dayStart.format('DD/MM')})`,
                 annotation1: {
                     text: `${dayStart.format('dddd')}`,
