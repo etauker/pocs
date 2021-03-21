@@ -19,7 +19,7 @@ export class TimelanesGraphic {
 
     private days: PeriodInternal[];
     public periods: Periods;
-    private svg: HTMLElement;
+    private svg: SVGSVGElement;
     private yBandKeys: string[];
 
     public scaleX: ScaleLinear<number, number, never>;
@@ -31,9 +31,9 @@ export class TimelanesGraphic {
         this.svg = this.getSvg(svgId);
         this.days = this.findDays(data);
         this.yBandKeys = this.days.map(data => data.group);
-        
-        this.WIDTH = parseInt(this.svg.getAttribute('width') || '0', 10);
-        this.HEIGHT = parseInt(this.svg.getAttribute('height') || '0', 10);
+
+        this.WIDTH = this.svg.width.baseVal.value;
+        this.HEIGHT = this.svg.height.baseVal.value;
 
         if (!this.WIDTH || !this.HEIGHT) {
             throw new Error('svg component must have "width" and "height" properties set');
@@ -181,12 +181,12 @@ export class TimelanesGraphic {
         }
     }
 
-    private getSvg(id: string): HTMLElement {
+    private getSvg(id: string): SVGSVGElement {
         const svg = document.getElementById(id);
         if (!svg) {
             throw new Error('svg component with id "' + id + '" not found');
         } else {
-            return svg;
+            return svg as any as SVGSVGElement;
         }
     }
 
