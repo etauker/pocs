@@ -3,56 +3,56 @@ import * as d3 from 'd3';
 
 import { Period, PeriodInternal } from './period.interface';
 import { ScaleBand, ScaleLinear } from 'd3';
-import { Annotation, AnnotationInternal } from 'annotation.interface';
 import { PeriodFillStyle } from './period-fill.type';
-import { TimelanesConfiguration } from 'timelanes-configuration.interface';
+import { TimelanesConfiguration } from './timelanes-configuration.interface';
+import { Periods } from './periods.component';
+import { Annotation, AnnotationInternal } from './annotation.interface';
 
 export class TimelanesGraphic {
 
-    private DEFAULT_PERIOD_BACKGROUND_COLOR = 'none';
-    private DEFAULT_PERIOD_FILL_COLOR = 'black';
-    private DEFAULT_ANNOTATION_TEXT_COLOR = 'black';
-    private DEFAULT_LINE_WIDTH = 2;
-
     private DAY_DURATION_MS = 24 * 60 * 60 * 1000;
     private container: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
-    private daySelection;//: d3.Selection<SVGRectElement, unknown, any, any>;
     private svg: HTMLElement;
-    private data: PeriodInternal[];
     private days: PeriodInternal[];
-    private componentWidth: number;
-    private componentHeight: number;
+    public WIDTH: number;
+    private HEIGHT: number;
     private yBandKeys: string[];
     
-    private scaleX: ScaleLinear<number, number, never>;
-    private scaleY: ScaleBand<string>;
-    
-    private tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
-    private periodSelection: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>;
+    public scaleX: ScaleLinear<number, number, never>;
+    public scaleY: ScaleBand<string>;
+    public tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
+    public periods: Periods;
     
     constructor(svgId: string, data: Period[], configuration: TimelanesConfiguration) {
-        this.data = this.processInput(JSON.parse(JSON.stringify(data)));
+        const copy: PeriodInternal[] = JSON.parse(JSON.stringify(data));
         this.container = this.getContainer(svgId);
         this.svg = this.getSvg(svgId);
         this.days = this.findDays(data);
         this.yBandKeys = this.days.map(data => data.group);
+        
+        this.WIDTH = parseInt(this.svg.getAttribute('width') || '0', 10);
+        this.HEIGHT = parseInt(this.svg.getAttribute('height') || '0', 10);
 
-        this.componentWidth = parseInt(this.svg.getAttribute('width') || '0', 10);
-        this.componentHeight = parseInt(this.svg.getAttribute('height') || '0', 10);
-        if (!this.componentWidth || !this.componentHeight) {
+        if (!this.WIDTH || !this.HEIGHT) {
             throw new Error('svg component must have "width" and "height" properties set');
         }
 
         this.scaleX = d3.scaleLinear()
-            .domain([0, this.DAY_DURATION_MS])
-            .range([0, this.componentWidth])
+            .domain([0, this.getMaxValue()])
+            .range([0, this.WIDTH])
 
         this.scaleY = d3.scaleBand()
             .domain(this.yBandKeys)
-            .rangeRound([0, this.componentHeight])
+            .rangeRound([0, this.HEIGHT])
             .padding(0.3)
 
-        this.daySelection = this.container
+        // TODO: generalise
+        this.tooltip = d3.select("#my_dataviz")
+            .append("div")
+            .classed('tooltip', true);
+
+        // const daySelection = 
+        this.container
             .selectAll('.day')
             .data(this.days)
             .enter()
@@ -60,151 +60,23 @@ export class TimelanesGraphic {
             .classed('day', true)
             .attr('width', data => this.scaleX(data.end - data.start))
             .attr('height', this.scaleY.bandwidth())
-            .attr('x', data => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
+            .attr('x', data => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.WIDTH)
             .attr('y', (data) => this.scaleY(data.group) || null)
 
-        this.periodSelection = this.container
+
+        const periodSelection = this.container
             .selectAll('.period')
-            .data(this.data)
+            .data(copy)
             .enter();
 
 
-        // // TODO: generalise
-        this.tooltip = d3.select("#my_dataviz")
-            .append("div")
-            .classed('tooltip', true);
-
-
+        this.periods = new Periods(this, copy, periodSelection);
         this.styleContainer(this.container);
-        this.formatPeriods(this.periodSelection);
-        this.addBoundaries(this.periodSelection)
-        this.addFill(this.periodSelection)
-        this.addAnnotations(this.periodSelection)
     }
 
     private styleContainer(container: any) {
         console.log('styling container...');
         container.classed('container', true);
-    }
-
-    private formatPeriods(periodSelection: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
-        const instance = this;
-
-        periodSelection
-            .append('rect')
-            .classed('day', true)
-            .attr('width', (data: PeriodInternal) => this.scaleX(data.end - data.start))
-            .attr('height', this.scaleY.bandwidth())
-            .attr('x', (data: PeriodInternal) => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y', (data: PeriodInternal) => this.scaleY(data.group) || null)
-            .style('fill', (data: PeriodInternal) => data.style?.backgroundColour || this.DEFAULT_PERIOD_BACKGROUND_COLOR)
-            .on('mouseover', function (event: any, period: PeriodInternal) {
-                let show = false;
-
-                if (!period.annotation1.hidden) {
-                    show = true;
-                    instance.tooltip.append('div')
-                        .text(period.annotation1.text);
-                }
-                if (!period.annotation1.hidden) {
-                    show = true;
-                    instance.tooltip.append('div')
-                        .text(period.annotation2.text);
-                }
-                if (show) {
-                    return instance.tooltip.style('visibility', 'visible');
-                }
-
-            })
-            .on('mousemove', function (event: any, period: Period) {
-                return instance.tooltip.style('top', (event.pageY)+'px').style('left',(event.pageX)+'px');
-            })
-            .on('mouseout', function () {
-                instance.tooltip.text('');
-                return instance.tooltip.style('visibility', 'hidden');
-            });
-    }
-
-    private addBoundaries(periodComponents: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
-        periodComponents
-            .append('line')
-            .classed('line', true)
-            .attr('x1', (data: PeriodInternal) => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y1', (data: PeriodInternal) => this.scaleY(data.group) || null)
-            .attr('x2', (data: PeriodInternal) => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y2', (data: PeriodInternal) => (this.scaleY(data.group) || 0) + this.scaleY.bandwidth())
-            .style('stroke', (data: PeriodInternal) => data.style?.fillColour || this.DEFAULT_PERIOD_FILL_COLOR)
-            .style('stroke-width', (data: PeriodInternal) => data.style?.lineWidth || this.DEFAULT_LINE_WIDTH)
-
-        periodComponents
-            .append('line')
-            .classed('line', true)
-            .attr('x1', (data: PeriodInternal) => (data.end % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y1', (data: PeriodInternal) => this.scaleY(data.group) || null)
-            .attr('x2', (data: PeriodInternal) => (data.end % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y2', (data: PeriodInternal) => (this.scaleY(data.group) || 0) + this.scaleY.bandwidth())
-            .style('stroke', (data: PeriodInternal) => data.style?.fillColour || this.DEFAULT_PERIOD_FILL_COLOR)
-            .style('stroke-width', (data: PeriodInternal) => data.style?.lineWidth || this.DEFAULT_LINE_WIDTH)
-        }
-
-    private addFill(periodComponents: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
-        periodComponents
-            .append('line')
-            .classed('fill-line-solid', (data: PeriodInternal) => data.style?.fillStyle === 'line-solid')
-            .classed('fill-line-dashed', (data: PeriodInternal) => data.style?.fillStyle === 'line-dashed')
-            .classed('fill-none', (data: PeriodInternal) => data.style?.fillStyle === 'none')
-            .attr('x1', (data: PeriodInternal) => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y1', (data: PeriodInternal) => (this.scaleY(data.group) || 0) + this.scaleY.bandwidth() / 2)
-            .attr('x2', (data: PeriodInternal) => (data.end % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y2', (data: PeriodInternal) => (this.scaleY(data.group) || 0) + this.scaleY.bandwidth() / 2)
-            .style('stroke', (data: PeriodInternal) => {
-                if (data.style?.fillStyle === 'none') {
-                    return 0;
-                }
-                return data.style?.fillColour || this.DEFAULT_PERIOD_FILL_COLOR;
-            })
-            .style('stroke-width', (data: PeriodInternal) => data.style?.lineWidth || this.DEFAULT_LINE_WIDTH)
-
-    }
-
-    private addAnnotations(periodComponents: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
-        const instance: TimelanesGraphic = this;
-
-        periodComponents
-            .append('text')
-            .classed('text', true)
-            .attr('x', (data: PeriodInternal) => ((data.start % this.DAY_DURATION_MS)) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y', (data: PeriodInternal) => (this.scaleY(data.group) || 0) + (this.scaleY.bandwidth() / 4))
-            .attr('width', (data: PeriodInternal) => (data.end - data.start) / 2 * this.componentWidth)
-            .attr('dx', (data: PeriodInternal) => (data.end - data.start) / this.DAY_DURATION_MS * this.componentWidth / 2)
-            .text((data: PeriodInternal) => data.annotation1.text)
-            .style('fill', (data: PeriodInternal) => data.annotation1.textColor || this.DEFAULT_ANNOTATION_TEXT_COLOR)
-            .text(function(data: PeriodInternal) {
-                if (this.getComputedTextLength() > instance.getPeriodWidth(data)) {
-                    data.annotation1.hidden = false;
-                    return '';
-                }
-                data.annotation1.hidden = true;
-                return data.annotation1.text;
-            })
-
-        periodComponents
-            .append('text')
-            .classed('text', true)
-            .attr('x', (data: PeriodInternal) => ((data.start % this.DAY_DURATION_MS)) / this.DAY_DURATION_MS * this.componentWidth)
-            .attr('y', (data: PeriodInternal) => (this.scaleY(data.group) || 0) + (this.scaleY.bandwidth() / 4 * 3) + (data.style?.lineWidth || this.DEFAULT_LINE_WIDTH))
-            .attr('width', (data: PeriodInternal) => (data.end - data.start) / 2 * this.componentWidth)
-            .attr('dx', (data: PeriodInternal) => (data.end - data.start) / this.DAY_DURATION_MS * this.componentWidth / 2)
-            .text((data: PeriodInternal) => data.annotation2.text)
-            .style('fill', (data: PeriodInternal) => data.annotation1.textColor || this.DEFAULT_ANNOTATION_TEXT_COLOR)
-            .text(function(data: PeriodInternal) {
-                if (this.getComputedTextLength() > instance.getPeriodWidth(data)) {
-                    data.annotation2.hidden = false;
-                    return '';
-                }
-                data.annotation2.hidden = true;
-                return data.annotation2.text;
-            })
     }
 
     private processInput(input: Period[]): PeriodInternal[] {
@@ -225,10 +97,6 @@ export class TimelanesGraphic {
         }
     }
 
-    private getPeriodWidth(data: PeriodInternal) {
-        return ((data.end - data.start) / this.DAY_DURATION_MS * this.componentWidth);
-    }
-
     private findDays(data: Period[]): PeriodInternal[] {
         const earliestTimestamp = data
             .map(val => val.start.valueOf())
@@ -238,10 +106,10 @@ export class TimelanesGraphic {
             .map(val => val.end.valueOf())
             .sort((val1, val2) => val2 - val1)[0];
 
-        const dayCount = Math.ceil((latestTimestamp - earliestTimestamp) / this.DAY_DURATION_MS) + 1;
+        const dayCount = Math.ceil((latestTimestamp - earliestTimestamp) / this.getMaxValue()) + 1;
         const days: Period[] = new Array(dayCount).fill(null).map((_, i) => {
            
-            const timestamp = earliestTimestamp + (this.DAY_DURATION_MS * i);
+            const timestamp = earliestTimestamp + (this.getMaxValue() * i);
             const dayStart = moment(timestamp).set({
                 hour:0,
                 minute:0,
@@ -285,5 +153,12 @@ export class TimelanesGraphic {
         } else {
             return svg;
         }
+    }
+
+    public getWidth(): number {
+        return this.WIDTH;
+    }
+    public getMaxValue(): number {
+        return this.DAY_DURATION_MS;
     }
 }
