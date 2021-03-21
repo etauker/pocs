@@ -1,59 +1,55 @@
-import moment from 'moment';
 import * as d3 from 'd3';
+import moment from 'moment';
 
 import { Period, PeriodInternal } from './period.interface';
-import { ScaleBand, ScaleLinear } from 'd3';
 import { PeriodFillStyle } from './period-fill.type';
 import { TimelanesConfiguration } from './timelanes-configuration.interface';
 import { Periods } from './periods.component';
 import { Annotation, AnnotationInternal } from './annotation.interface';
+import { Tooltip } from './tooltip';
 
 export class TimelanesGraphic {
 
     private DAY_DURATION_MS = 24 * 60 * 60 * 1000;
-    private HEIGHT: number;
-    private WIDTH: number;
+    private HEIGHT_PX: number;
+    private WIDTH_PX: number;
 
     private container: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
-    public tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
+    private tooltip: Tooltip;
+    private yBandKeys: string[];
+    private svg: SVGSVGElement;
 
     private days: PeriodInternal[];
-    public periods: Periods;
-    private svg: SVGSVGElement;
-    private yBandKeys: string[];
+    private periods: Periods;
 
-    public scaleX: ScaleLinear<number, number, never>;
-    public scaleY: ScaleBand<string>;
+    public scaleX: d3.ScaleLinear<number, number, never>;
+    public scaleY: d3.ScaleBand<string>;
 
-    constructor(svgId: string, data: Period[], configuration: TimelanesConfiguration) {
+    constructor(svgId: string, tooltipId: string, data: Period[], configuration: TimelanesConfiguration) {
         const copy: PeriodInternal[] = JSON.parse(JSON.stringify(data));
         this.container = this.getContainer(svgId);
         this.svg = this.getSvg(svgId);
         this.days = this.findDays(data);
         this.yBandKeys = this.days.map(data => data.group);
 
-        this.WIDTH = this.svg.width.baseVal.value;
-        this.HEIGHT = this.svg.height.baseVal.value;
+        this.WIDTH_PX = this.svg.width.baseVal.value;
+        this.HEIGHT_PX = this.svg.height.baseVal.value;
 
-        if (!this.WIDTH || !this.HEIGHT) {
+        if (!this.WIDTH_PX || !this.HEIGHT_PX) {
             throw new Error('svg component must have "width" and "height" properties set');
         }
 
         this.scaleX = d3.scaleLinear()
             .domain([0, this.getMaxValue()])
-            .range([0, this.WIDTH])
+            .range([0, this.WIDTH_PX])
 
         this.scaleY = d3.scaleBand()
             .domain(this.yBandKeys)
-            .rangeRound([0, this.HEIGHT])
+            .rangeRound([0, this.HEIGHT_PX])
             .padding(0.3)
 
-        // TODO: generalise
-        this.tooltip = d3.select("#my_dataviz")
-            .append("div")
-            .classed('tooltip', true);
+        this.tooltip = new Tooltip(tooltipId);
 
-        // const daySelection = 
         this.container
             .selectAll('.day')
             .data(this.days)
@@ -62,55 +58,34 @@ export class TimelanesGraphic {
             .classed('day', true)
             .attr('width', data => this.scaleX(data.end - data.start))
             .attr('height', this.scaleY.bandwidth())
-            .attr('x', data => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.WIDTH)
+            .attr('x', data => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.WIDTH_PX)
             .attr('y', (data) => this.scaleY(data.group) || null)
-
 
         const periodSelection = this.container
             .selectAll('.period')
             .data(copy)
             .enter();
 
-
-        this.periods = new Periods(this, copy, periodSelection);
+        this.periods = new Periods(this, copy, this.tooltip, periodSelection);
         this.styleContainer(this.container);
     }
 
-    /**
-     * Shows the the array of strings in the tooltip. 
-     * All lines are hidden if any of the elements in display array is false.
+    /** 
+     * Returns the width of the svg component in pixels.
      */
-    public showTooltip(lines: string[], display: boolean[]): void {
-        const show = lines
-            .map((text: string, index: number) => {
-                this.tooltip.append('div').text(text);
-                return display[index];
-            })
-            .some(display => display);
-
-        if (show) {
-            this.tooltip.style('visibility', 'visible');
-        } else {
-            this.tooltip.text('').style('visibility', 'hidden');
-        }
+    public getWidth(): number {
+        return this.WIDTH_PX;
     }
 
-    /**
-     * Hide the tooltip.
+    /** 
+     * Returns the maximum X value in milliseconds.
      */
-    public hideTooltip(): void {
-        this.tooltip.text('').style('visibility', 'hidden');
+    public getMaxValue(): number {
+        return this.DAY_DURATION_MS;
     }
 
-    /**
-     * Update the location of thetooltip on the screen.
-     */
-    public moveTooltip(x: number, y: number): void {
-        this.tooltip.style('top', y + 'px').style('left', x + 'px');
-    }
 
     private styleContainer(container: any) {
-        console.log('styling container...');
         container.classed('container', true);
     }
 
@@ -188,12 +163,5 @@ export class TimelanesGraphic {
         } else {
             return svg as any as SVGSVGElement;
         }
-    }
-
-    public getWidth(): number {
-        return this.WIDTH;
-    }
-    public getMaxValue(): number {
-        return this.DAY_DURATION_MS;
     }
 }

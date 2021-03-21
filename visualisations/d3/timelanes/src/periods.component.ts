@@ -1,3 +1,4 @@
+import { Tooltip } from 'tooltip';
 import { Annotation, AnnotationInternal } from './annotation.interface';
 import { Period, PeriodInternal } from './period.interface';
 import { TimelanesGraphic } from './timelanes-graphic';
@@ -12,9 +13,11 @@ export class Periods {
     private selection: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>;
     private data: PeriodInternal[];
     private component: TimelanesGraphic;
+    private tooltip: Tooltip;
 
-    constructor(parent: TimelanesGraphic, data: Period[], selection: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
+    constructor(parent: TimelanesGraphic, data: Period[], tooltip: Tooltip, selection: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
         this.component = parent;
+        this.tooltip = tooltip;
         this.selection = selection;
         this.data = data.map(period => this.processPeriod(period));
         this.selection.data(this.data).enter();
@@ -66,18 +69,16 @@ export class Periods {
             .attr('x', (data: PeriodInternal) => this.findX(data.start % MAX_X_VALUE))
             .attr('y', (data: PeriodInternal) => instance.component.scaleY(data.group) || null)
             .style('fill', (data: PeriodInternal) => data.style?.backgroundColour || this.DEFAULT_PERIOD_BACKGROUND_COLOR)
-            .on('mousemove', (event: any) => this.component.moveTooltip(event.pageX, event.pageY))
-            .on('mouseout', () => this.component.hideTooltip())
+            .on('mousemove', (event: any) => this.tooltip.move(event.pageX, event.pageY))
+            .on('mouseout', () => this.tooltip.hide())
             .on('mouseover', (event: any, period: PeriodInternal) => {
                 const lines = [
                     period.annotation1.text,
                     period.annotation2.text,
                 ];
-                const display = [
-                    !period.annotation1.hidden,
-                    !period.annotation2.hidden
-                ];
-                this.component.showTooltip(lines, display);
+                if (!period.annotation1.hidden || !period.annotation2.hidden) {
+                    this.tooltip.show(lines);
+                }
             })
     }
 
