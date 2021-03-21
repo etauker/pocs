@@ -11,18 +11,20 @@ import { Annotation, AnnotationInternal } from './annotation.interface';
 export class TimelanesGraphic {
 
     private DAY_DURATION_MS = 24 * 60 * 60 * 1000;
-    private container: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
-    private svg: HTMLElement;
-    private days: PeriodInternal[];
-    public WIDTH: number;
     private HEIGHT: number;
+    private WIDTH: number;
+
+    private container: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
+    public tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
+
+    private days: PeriodInternal[];
+    public periods: Periods;
+    private svg: HTMLElement;
     private yBandKeys: string[];
-    
+
     public scaleX: ScaleLinear<number, number, never>;
     public scaleY: ScaleBand<string>;
-    public tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
-    public periods: Periods;
-    
+
     constructor(svgId: string, data: Period[], configuration: TimelanesConfiguration) {
         const copy: PeriodInternal[] = JSON.parse(JSON.stringify(data));
         this.container = this.getContainer(svgId);
@@ -72,6 +74,39 @@ export class TimelanesGraphic {
 
         this.periods = new Periods(this, copy, periodSelection);
         this.styleContainer(this.container);
+    }
+
+    /**
+     * Shows the the array of strings in the tooltip. 
+     * All lines are hidden if any of the elements in display array is false.
+     */
+    public showTooltip(lines: string[], display: boolean[]): void {
+        const show = lines
+            .map((text: string, index: number) => {
+                this.tooltip.append('div').text(text);
+                return display[index];
+            })
+            .some(display => display);
+
+        if (show) {
+            this.tooltip.style('visibility', 'visible');
+        } else {
+            this.tooltip.text('').style('visibility', 'hidden');
+        }
+    }
+
+    /**
+     * Hide the tooltip.
+     */
+    public hideTooltip(): void {
+        this.tooltip.text('').style('visibility', 'hidden');
+    }
+
+    /**
+     * Update the location of thetooltip on the screen.
+     */
+    public moveTooltip(x: number, y: number): void {
+        this.tooltip.style('top', y + 'px').style('left', x + 'px');
     }
 
     private styleContainer(container: any) {

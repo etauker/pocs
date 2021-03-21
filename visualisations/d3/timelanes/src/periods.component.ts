@@ -66,31 +66,19 @@ export class Periods {
             .attr('x', (data: PeriodInternal) => this.findX(data.start % MAX_X_VALUE))
             .attr('y', (data: PeriodInternal) => instance.component.scaleY(data.group) || null)
             .style('fill', (data: PeriodInternal) => data.style?.backgroundColour || this.DEFAULT_PERIOD_BACKGROUND_COLOR)
-            .on('mouseover', function (event: any, period: PeriodInternal) {
-                let show = false;
-
-                if (!period.annotation1.hidden) {
-                    show = true;
-                    instance.component.tooltip.append('div')
-                        .text(period.annotation1.text);
-                }
-                if (!period.annotation1.hidden) {
-                    show = true;
-                    instance.component.tooltip.append('div')
-                        .text(period.annotation2.text);
-                }
-                if (show) {
-                    return instance.component.tooltip.style('visibility', 'visible');
-                }
-
+            .on('mousemove', (event: any) => this.component.moveTooltip(event.pageX, event.pageY))
+            .on('mouseout', () => this.component.hideTooltip())
+            .on('mouseover', (event: any, period: PeriodInternal) => {
+                const lines = [
+                    period.annotation1.text,
+                    period.annotation2.text,
+                ];
+                const display = [
+                    !period.annotation1.hidden,
+                    !period.annotation2.hidden
+                ];
+                this.component.showTooltip(lines, display);
             })
-            .on('mousemove', function (event: any, period: Period) {
-                return instance.component.tooltip.style('top', (event.pageY)+'px').style('left',(event.pageX)+'px');
-            })
-            .on('mouseout', function () {
-                instance.component.tooltip.text('');
-                return instance.component.tooltip.style('visibility', 'hidden');
-            });
     }
 
     private addBoundaries(periodComponents: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
@@ -100,9 +88,9 @@ export class Periods {
         periodComponents
             .append('line')
             .classed('line', true)
-            .attr('x1', (data: PeriodInternal) => (data.start % MAX_X_VALUE) / MAX_X_VALUE * instance.component.WIDTH)
+            .attr('x1', (data: PeriodInternal) => (data.start % MAX_X_VALUE) / MAX_X_VALUE * instance.component.getWidth())
             .attr('y1', (data: PeriodInternal) => instance.component.scaleY(data.group) || null)
-            .attr('x2', (data: PeriodInternal) => (data.start % MAX_X_VALUE) / MAX_X_VALUE * instance.component.WIDTH)
+            .attr('x2', (data: PeriodInternal) => (data.start % MAX_X_VALUE) / MAX_X_VALUE * instance.component.getWidth())
             .attr('y2', (data: PeriodInternal) => (instance.component.scaleY(data.group) || 0) + instance.component.scaleY.bandwidth())
             .style('stroke', (data: PeriodInternal) => data.style?.fillColour || this.DEFAULT_PERIOD_FILL_COLOR)
             .style('stroke-width', (data: PeriodInternal) => data.style?.lineWidth || this.DEFAULT_LINE_WIDTH)
@@ -110,9 +98,9 @@ export class Periods {
         periodComponents
             .append('line')
             .classed('line', true)
-            .attr('x1', (data: PeriodInternal) => (data.end % MAX_X_VALUE) / MAX_X_VALUE * instance.component.WIDTH)
+            .attr('x1', (data: PeriodInternal) => (data.end % MAX_X_VALUE) / MAX_X_VALUE * instance.component.getWidth())
             .attr('y1', (data: PeriodInternal) => instance.component.scaleY(data.group) || null)
-            .attr('x2', (data: PeriodInternal) => (data.end % MAX_X_VALUE) / MAX_X_VALUE * instance.component.WIDTH)
+            .attr('x2', (data: PeriodInternal) => (data.end % MAX_X_VALUE) / MAX_X_VALUE * instance.component.getWidth())
             .attr('y2', (data: PeriodInternal) => (instance.component.scaleY(data.group) || 0) + instance.component.scaleY.bandwidth())
             .style('stroke', (data: PeriodInternal) => data.style?.fillColour || this.DEFAULT_PERIOD_FILL_COLOR)
             .style('stroke-width', (data: PeriodInternal) => data.style?.lineWidth || this.DEFAULT_LINE_WIDTH)
@@ -127,9 +115,9 @@ export class Periods {
             .classed('fill-line-solid', (data: PeriodInternal) => data.style?.fillStyle === 'line-solid')
             .classed('fill-line-dashed', (data: PeriodInternal) => data.style?.fillStyle === 'line-dashed')
             .classed('fill-none', (data: PeriodInternal) => data.style?.fillStyle === 'none')
-            .attr('x1', (data: PeriodInternal) => (data.start % MAX_X_VALUE) / MAX_X_VALUE * instance.component.WIDTH)
+            .attr('x1', (data: PeriodInternal) => (data.start % MAX_X_VALUE) / MAX_X_VALUE * instance.component.getWidth())
             .attr('y1', (data: PeriodInternal) => (instance.component.scaleY(data.group) || 0) + instance.component.scaleY.bandwidth() / 2)
-            .attr('x2', (data: PeriodInternal) => (data.end % MAX_X_VALUE) / MAX_X_VALUE * instance.component.WIDTH)
+            .attr('x2', (data: PeriodInternal) => (data.end % MAX_X_VALUE) / MAX_X_VALUE * instance.component.getWidth())
             .attr('y2', (data: PeriodInternal) => (instance.component.scaleY(data.group) || 0) + instance.component.scaleY.bandwidth() / 2)
             .style('stroke', (data: PeriodInternal) => {
                 if (data.style?.fillStyle === 'none') {
@@ -148,10 +136,10 @@ export class Periods {
         periodComponents
             .append('text')
             .classed('text', true)
-            .attr('x', (data: PeriodInternal) => ((data.start % MAX_X_VALUE)) / MAX_X_VALUE * instance.component.WIDTH)
+            .attr('x', (data: PeriodInternal) => ((data.start % MAX_X_VALUE)) / MAX_X_VALUE * instance.component.getWidth())
             .attr('y', (data: PeriodInternal) => (instance.component.scaleY(data.group) || 0) + (instance.component.scaleY.bandwidth() / 4))
-            .attr('width', (data: PeriodInternal) => (data.end - data.start) / 2 * instance.component.WIDTH)
-            .attr('dx', (data: PeriodInternal) => (data.end - data.start) / MAX_X_VALUE * instance.component.WIDTH / 2)
+            .attr('width', (data: PeriodInternal) => (data.end - data.start) / 2 * instance.component.getWidth())
+            .attr('dx', (data: PeriodInternal) => (data.end - data.start) / MAX_X_VALUE * instance.component.getWidth() / 2)
             .text((data: PeriodInternal) => data.annotation1.text)
             .style('fill', (data: PeriodInternal) => data.annotation1.textColor || this.DEFAULT_ANNOTATION_TEXT_COLOR)
             .text(function(data: PeriodInternal) {
@@ -166,10 +154,10 @@ export class Periods {
         periodComponents
             .append('text')
             .classed('text', true)
-            .attr('x', (data: PeriodInternal) => ((data.start % MAX_X_VALUE)) / MAX_X_VALUE * instance.component.WIDTH)
+            .attr('x', (data: PeriodInternal) => ((data.start % MAX_X_VALUE)) / MAX_X_VALUE * instance.component.getWidth())
             .attr('y', (data: PeriodInternal) => (instance.component.scaleY(data.group) || 0) + (instance.component.scaleY.bandwidth() / 4 * 3) + (data.style?.lineWidth || this.DEFAULT_LINE_WIDTH))
-            .attr('width', (data: PeriodInternal) => (data.end - data.start) / 2 * instance.component.WIDTH)
-            .attr('dx', (data: PeriodInternal) => (data.end - data.start) / MAX_X_VALUE * instance.component.WIDTH / 2)
+            .attr('width', (data: PeriodInternal) => (data.end - data.start) / 2 * instance.component.getWidth())
+            .attr('dx', (data: PeriodInternal) => (data.end - data.start) / MAX_X_VALUE * instance.component.getWidth() / 2)
             .text((data: PeriodInternal) => data.annotation2.text)
             .style('fill', (data: PeriodInternal) => data.annotation1.textColor || this.DEFAULT_ANNOTATION_TEXT_COLOR)
             .text(function(data: PeriodInternal) {
