@@ -5,6 +5,7 @@ import { Annotation, AnnotationInternal } from 'annotation.interface';
 import { PeriodFillStyle } from 'period-fill.type';
 import { Period, PeriodInternal } from './period.interface';
 import { TimelanesGraphic } from 'timelanes-graphic';
+import { PeriodStyle } from 'period-style.interface';
 
 
 export class Days {
@@ -12,7 +13,7 @@ export class Days {
     private selection: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>;
     private data: PeriodInternal[];
 
-    constructor(parent: TimelanesGraphic, selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>, data: PeriodInternal[]) {
+    constructor(parent: TimelanesGraphic, selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>, data: PeriodInternal[], config?: PeriodStyle) {
         this.selection = selection.data(data).enter();
         this.data = data;
 
@@ -23,6 +24,17 @@ export class Days {
             .attr('height', parent.scaleY.bandwidth())
             .attr('x', data => (data.start % parent.getMaxValue()) / parent.getMaxValue() * parent.getWidth())
             .attr('y', (data) => parent.scaleY(data.group) || null)
+            .style('fill', config?.backgroundColour || 'white')
+            .style('outline-color', config?.borderColour || 'black')
+            .style('outline-width', config?.borderWidth || '1px')
+            .style('outline-style', config?.borderStyle || 'solid')
+
+            if (config?.fillStyle) {
+                // TODO: implement
+                // fillStyle
+                // fillColour
+                // lineWidth
+            }
     }
 
     public getGroups() {

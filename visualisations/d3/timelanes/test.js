@@ -62,5 +62,22 @@ const PERIODS = [
 const timeline = new TimelanesGraphic({
     svg: 'visual',
     tooltip: 'tooltip'
-}, PERIODS);
+}, PERIODS, {
+    timelaneStyle: {
+        backgroundColour: 'grey',
+
+        borderColour: 'red',
+        borderWidth: '3px',
+        borderStyle: 'solid',
+
+        // TODO: implement for days
+        fillStyle: 'dashed',
+        fillColour: 'yellow',
+        lineWidth: '7px',
+    },
+    backgroundColour: 'green',
+    borderColour: 'red',
+    borderWidth: '5px',
+    borderStyle: 'dashed',
+});
 

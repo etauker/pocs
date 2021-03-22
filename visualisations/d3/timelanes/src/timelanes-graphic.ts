@@ -23,7 +23,7 @@ export class TimelanesGraphic {
     public scaleX: d3.ScaleLinear<number, number, never>;
     public scaleY: d3.ScaleBand<string>;
 
-    constructor(ids: Elements, data: Period[], configuration: TimelanesConfiguration) {
+    constructor(ids: Elements, data: Period[], configuration: TimelanesConfiguration = {}) {
         this.container = this.getContainer(ids.svg);
         this.svg = this.getSvg(ids.svg);
 
@@ -54,9 +54,9 @@ export class TimelanesGraphic {
 
         // format sub-objects
         this.tooltip = new Tooltip(ids.tooltip);
-        this.days = new Days(this, daysSelection, days);
+        this.days = new Days(this, daysSelection, days, configuration?.timelaneStyle);
         this.periods = new Periods(this, periodSelection, periods, this.tooltip);
-        this.styleContainer(this.container);
+        this.styleContainer(this.container, configuration);
     }
 
     /** 
@@ -91,8 +91,14 @@ export class TimelanesGraphic {
         }
     }
 
-    private styleContainer(container: any) {
-        container.classed('container', true);
+    private styleContainer(container: any, configuration: TimelanesConfiguration) {
+        container
+        .classed('container', true)
+        .style('background-color', configuration.backgroundColour || 'dddddd')
+        .style('border-color', configuration.borderColour || 'black')
+        .style('border-width', configuration.borderWidth || '3px')
+        .style('border-style', configuration.borderStyle || 'solid')
+
     }
 
 }

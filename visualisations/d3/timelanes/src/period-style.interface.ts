@@ -5,4 +5,9 @@ export interface PeriodStyle {
     fillStyle?: PeriodFillStyle;
     fillColour?: string;
     lineWidth?: number;
+
+    // TODO: implement for periods
+    borderColour?: number;
+    borderWidth?: number;
+    borderStyle?: string;
 }

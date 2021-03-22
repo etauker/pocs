@@ -1,5 +1,11 @@
 import { PeriodStyle } from './period-style.interface';
 
 export interface TimelanesConfiguration {
-    timelaneStyle: PeriodStyle;
+    // TODO: implement
+    timelaneStyle?: PeriodStyle;
+
+    backgroundColour?: string;
+    borderColour?: number;
+    borderWidth?: number;
+    borderStyle?: string;
 }
