@@ -1,12 +1,11 @@
 import * as d3 from 'd3';
-import moment from 'moment';
 
 import { Period, PeriodInternal } from './period.interface';
-import { PeriodFillStyle } from './period-fill.type';
 import { TimelanesConfiguration } from './timelanes-configuration.interface';
 import { Periods } from './periods.component';
-import { Annotation, AnnotationInternal } from './annotation.interface';
 import { Tooltip } from './tooltip';
+import { Days } from './days';
+import { Elements } from './elements.interface';
 
 export class TimelanesGraphic {
 
@@ -15,58 +14,48 @@ export class TimelanesGraphic {
     private WIDTH_PX: number;
 
     private container: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
-    private tooltip: Tooltip;
-    private yBandKeys: string[];
     private svg: SVGSVGElement;
 
-    private days: PeriodInternal[];
+    private days: Days;
     private periods: Periods;
+    private tooltip: Tooltip;
 
     public scaleX: d3.ScaleLinear<number, number, never>;
     public scaleY: d3.ScaleBand<string>;
 
-    constructor(svgId: string, tooltipId: string, data: Period[], configuration: TimelanesConfiguration) {
-        const copy: PeriodInternal[] = JSON.parse(JSON.stringify(data));
-        this.container = this.getContainer(svgId);
-        this.svg = this.getSvg(svgId);
-        this.days = this.findDays(data);
-        this.yBandKeys = this.days.map(data => data.group);
+    constructor(ids: Elements, data: Period[], configuration: TimelanesConfiguration) {
+        this.container = this.getContainer(ids.svg);
+        this.svg = this.getSvg(ids.svg);
 
+        // get svg dimentions
         this.WIDTH_PX = this.svg.width.baseVal.value;
         this.HEIGHT_PX = this.svg.height.baseVal.value;
-
         if (!this.WIDTH_PX || !this.HEIGHT_PX) {
             throw new Error('svg component must have "width" and "height" properties set');
         }
 
+        // get selections
+        const daysSelection = this.container.selectAll('.day');
+        const periodSelection = this.container.selectAll('.period');
+
+        // prepare data
+        const periods: PeriodInternal[] = JSON.parse(JSON.stringify(data));
+        const days = Days.findDays(periods, this.getMaxValue());
+
+        // prepare scaling methods
         this.scaleX = d3.scaleLinear()
             .domain([0, this.getMaxValue()])
             .range([0, this.WIDTH_PX])
 
         this.scaleY = d3.scaleBand()
-            .domain(this.yBandKeys)
+            .domain(days.map(item => item.group))
             .rangeRound([0, this.HEIGHT_PX])
             .padding(0.3)
 
-        this.tooltip = new Tooltip(tooltipId);
-
-        this.container
-            .selectAll('.day')
-            .data(this.days)
-            .enter()
-            .append('rect')
-            .classed('day', true)
-            .attr('width', data => this.scaleX(data.end - data.start))
-            .attr('height', this.scaleY.bandwidth())
-            .attr('x', data => (data.start % this.DAY_DURATION_MS) / this.DAY_DURATION_MS * this.WIDTH_PX)
-            .attr('y', (data) => this.scaleY(data.group) || null)
-
-        const periodSelection = this.container
-            .selectAll('.period')
-            .data(copy)
-            .enter();
-
-        this.periods = new Periods(this, copy, this.tooltip, periodSelection);
+        // format sub-objects
+        this.tooltip = new Tooltip(ids.tooltip);
+        this.days = new Days(this, daysSelection, days);
+        this.periods = new Periods(this, periodSelection, periods, this.tooltip);
         this.styleContainer(this.container);
     }
 
@@ -82,69 +71,6 @@ export class TimelanesGraphic {
      */
     public getMaxValue(): number {
         return this.DAY_DURATION_MS;
-    }
-
-
-    private styleContainer(container: any) {
-        container.classed('container', true);
-    }
-
-    private processInput(input: Period[]): PeriodInternal[] {
-        return input.map(period => {
-                return {
-                    ...period,
-                    group: `${moment(period.start).format('dddd')} (${moment(period.start).format('DD/MM')})`,
-                    annotation1: this.processAnnotation(period.annotation1),
-                    annotation2: this.processAnnotation(period.annotation2),
-                }
-            })
-    }
-
-    private processAnnotation(original: Annotation): AnnotationInternal {
-        return {
-            ...original,
-            hidden: false,
-        }
-    }
-
-    private findDays(data: Period[]): PeriodInternal[] {
-        const earliestTimestamp = data
-            .map(val => val.start.valueOf())
-            .sort((val1, val2) => val1 - val2)[0];
-
-        const latestTimestamp = data
-            .map(val => val.end.valueOf())
-            .sort((val1, val2) => val2 - val1)[0];
-
-        const dayCount = Math.ceil((latestTimestamp - earliestTimestamp) / this.getMaxValue()) + 1;
-        const days: Period[] = new Array(dayCount).fill(null).map((_, i) => {
-           
-            const timestamp = earliestTimestamp + (this.getMaxValue() * i);
-            const dayStart = moment(timestamp).set({
-                hour:0,
-                minute:0,
-                second:0,
-                millisecond:0,
-            });
-            const dayEnd = dayStart.clone().add(1, 'day').subtract(1, 'millisecond');
-
-            return {
-                start: dayStart.valueOf(),
-                end: dayEnd.valueOf(),
-                style: {
-                    fillStyle: 'none' as PeriodFillStyle,
-                },
-                group: `${dayStart.format('dddd')} (${dayStart.format('DD/MM')})`,
-                annotation1: {
-                    text: `${dayStart.format('dddd')}`,
-                },
-                annotation2: {
-                    text: dayEnd.diff(dayStart, 'hours') + 'h',
-                },
-            };
-        }).sort((day1, day2) => day1.start - day2.start);
-
-        return this.processInput(days);
     }
 
     private getContainer(id: string): d3.Selection<d3.BaseType, unknown, HTMLElement, any> {
@@ -164,4 +90,9 @@ export class TimelanesGraphic {
             return svg as any as SVGSVGElement;
         }
     }
+
+    private styleContainer(container: any) {
+        container.classed('container', true);
+    }
+
 }

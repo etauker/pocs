@@ -15,18 +15,16 @@ export class Periods {
     private component: TimelanesGraphic;
     private tooltip: Tooltip;
 
-    constructor(parent: TimelanesGraphic, data: Period[], tooltip: Tooltip, selection: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>) {
+    constructor(parent: TimelanesGraphic, selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>, data: Period[], tooltip: Tooltip) {
         this.component = parent;
         this.tooltip = tooltip;
-        this.selection = selection;
         this.data = data.map(period => this.processPeriod(period));
-        this.selection.data(this.data).enter();
+        this.selection = selection.data(this.data).enter();
         this.formatPeriods(this.selection);
         this.addBoundaries(this.selection);
         this.addFill(this.selection);
         this.addAnnotations(this.selection);
     }
-
 
     private processPeriod(input: Period): PeriodInternal {
         return {

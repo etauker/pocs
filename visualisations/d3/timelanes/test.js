@@ -59,5 +59,8 @@ const PERIODS = [
     }
 ];
 
-const timeline = new TimelanesGraphic('visual', 'tooltip', PERIODS);
+const timeline = new TimelanesGraphic({
+    svg: 'visual',
+    tooltip: 'tooltip'
+}, PERIODS);
 
