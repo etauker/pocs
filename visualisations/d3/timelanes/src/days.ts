@@ -13,7 +13,7 @@ export class Days {
     private selection: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, unknown>;
     private data: PeriodInternal[];
 
-    constructor(parent: TimelanesGraphic, selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>, data: PeriodInternal[], config?: PeriodStyle) {
+    constructor(parent: TimelanesGraphic, selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>, data: PeriodInternal[], config: PeriodStyle = {}) {
         this.selection = selection.data(data).enter();
         this.data = data;
 

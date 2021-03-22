@@ -94,10 +94,10 @@ export class TimelanesGraphic {
     private styleContainer(container: any, configuration: TimelanesConfiguration) {
         container
         .classed('container', true)
-        .style('background-color', configuration.backgroundColour || 'dddddd')
-        .style('border-color', configuration.borderColour || 'black')
-        .style('border-width', configuration.borderWidth || '3px')
-        .style('border-style', configuration.borderStyle || 'solid')
+        .style('background-color', configuration?.backgroundColour || 'dddddd')
+        .style('border-color', configuration?.borderColour || 'black')
+        .style('border-width', configuration?.borderWidth || '3px')
+        .style('border-style', configuration?.borderStyle || 'solid')
 
     }
 

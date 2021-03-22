@@ -64,9 +64,9 @@ const timeline = new TimelanesGraphic({
     tooltip: 'tooltip'
 }, PERIODS, {
     timelaneStyle: {
-        backgroundColour: 'grey',
+        backgroundColour: 'wheat',
 
-        borderColour: 'red',
+        borderColour: 'darkgrey',
         borderWidth: '3px',
         borderStyle: 'solid',
 
@@ -75,8 +75,8 @@ const timeline = new TimelanesGraphic({
         fillColour: 'yellow',
         lineWidth: '7px',
     },
-    backgroundColour: 'green',
-    borderColour: 'red',
+    backgroundColour: 'yellowgreen',
+    borderColour: 'silver',
     borderWidth: '5px',
     borderStyle: 'dashed',
 });
