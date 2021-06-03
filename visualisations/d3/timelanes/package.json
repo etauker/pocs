@@ -1,5 +1,5 @@
 {
-  "name": "timelanes",
+  "name": "@etauker/d3-timelanes",
   "version": "1.0.0",
   "description": "A simple D3 timelane chart",
   "scripts": {

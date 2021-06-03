@@ -1,0 +1,16 @@
+{
+  "name": "@etauker/d3-components",
+  "version": "1.0.0",
+  "description": "Sample usage of etauker d3 components",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "etauker",
+  "license": "UNLICENCED",
+  "dependencies": {
+    "@etauker/d3-timelanes": "file:timelanes",
+    "d3": "^6.6.1",
+    "moment": "^2.29.1"
+  }
+}
