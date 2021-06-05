@@ -1,5 +1,7 @@
-import * as moment from 'moment';
-import { Component, OnInit } from '@angular/core';
+import * as moment_ from 'moment';
+const moment = moment_;
+
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { TimelanesGraphic } from '../classes/timelanes-graphic';
 import { Period } from '../classes/period.interface';
 
@@ -8,11 +10,17 @@ import { Period } from '../classes/period.interface';
   templateUrl: './timelanes-graphic.component.html',
   styleUrls: ['./timelanes-graphic.component.css']
 })
-export class TimelanesGraphicComponent implements OnInit {
+export class TimelanesGraphicComponent implements OnInit, AfterViewInit {
 
   constructor() { }
 
-  ngOnInit() {
+  ngAfterViewInit() {
+    setTimeout(() => this.init(), 10);
+  }
+  
+  ngOnInit() { }
+
+  private init() {
     // source: https://www.youtube.com/watch?v=TOJ9yjvlapY
     // tooltip source: https://www.d3-graph-gallery.com/graph/interactivity_tooltip.html
 

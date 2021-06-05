@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
-import * as moment from 'moment';
+import * as moment_ from 'moment';
+const moment = moment_;
 
 import { Annotation, AnnotationInternal } from './annotation.interface';
 import { PeriodFillStyle } from './period-fill.type';

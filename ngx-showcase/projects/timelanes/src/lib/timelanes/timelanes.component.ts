@@ -1,4 +1,5 @@
-// import * as moment from 'moment';
+// import * as moment_ from 'moment';
+// const moment = moment_;
 import { Component, OnInit } from '@angular/core';
 // import { TimelanesGraphic } from './classes/timelanes-graphic';
 

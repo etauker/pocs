@@ -1,5 +1,6 @@
-import * as moment from 'moment';
 import * as d3 from 'd3';
+import * as moment_ from 'moment';
+const moment = moment_;
 
 import { Tooltip } from './tooltip';
 import { Annotation, AnnotationInternal } from './annotation.interface';
