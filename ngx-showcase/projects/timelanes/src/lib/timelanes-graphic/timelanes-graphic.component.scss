@@ -1,0 +1,6 @@
+$border_width: 5px;
+
+.timelanes-graphic {
+    width: calc(100% - #{ $border_width * 2 });
+    height: calc(100% - #{ $border_width * 2 });
+}

@@ -8,7 +8,7 @@ import { Period } from '../classes/period.interface';
 @Component({
   selector: 'lib-timelanes-graphic',
   templateUrl: './timelanes-graphic.component.html',
-  styleUrls: ['./timelanes-graphic.component.css']
+  styleUrls: ['./timelanes-graphic.component.scss']
 })
 export class TimelanesGraphicComponent implements OnInit, AfterViewInit {
 
