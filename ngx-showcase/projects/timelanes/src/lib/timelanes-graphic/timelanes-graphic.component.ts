@@ -3,7 +3,7 @@ const moment = moment_;
 
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { TimelanesGraphic } from '../classes/timelanes-graphic';
-import { Period } from '../classes/period.interface';
+import { Period } from '../model/period.interface';
 
 @Component({
   selector: 'lib-timelanes-graphic',

@@ -3,8 +3,8 @@ import * as moment_ from 'moment';
 const moment = moment_;
 
 import { Tooltip } from './tooltip';
-import { Annotation, AnnotationInternal } from './annotation.interface';
-import { Period, PeriodInternal } from './period.interface';
+import { Annotation, AnnotationInternal } from '../model/annotation.interface';
+import { Period, PeriodInternal } from '../model/period.interface';
 import { TimelanesGraphic } from './timelanes-graphic';
 
 export class Periods {

@@ -2,11 +2,11 @@ import * as d3 from 'd3';
 import * as moment_ from 'moment';
 const moment = moment_;
 
-import { Annotation, AnnotationInternal } from './annotation.interface';
-import { PeriodFillStyle } from './period-fill.type';
-import { Period, PeriodInternal } from './period.interface';
+import { Annotation, AnnotationInternal } from '../model/annotation.interface';
+import { PeriodFillStyle } from '../model/period-fill.type';
+import { Period, PeriodInternal } from '../model/period.interface';
 import { TimelanesGraphic } from './timelanes-graphic';
-import { PeriodStyle } from './period-style.interface';
+import { PeriodStyle } from '../model/period-style.interface';
 
 export class Days {
 

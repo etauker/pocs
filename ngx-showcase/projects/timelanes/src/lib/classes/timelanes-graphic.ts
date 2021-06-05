@@ -1,11 +1,11 @@
 import * as d3 from 'd3';
 
-import { Period, PeriodInternal } from './period.interface';
-import { TimelanesConfiguration } from './timelanes-configuration.interface';
+import { Period, PeriodInternal } from '../model/period.interface';
+import { TimelanesConfiguration } from '../model/timelanes-configuration.interface';
 import { Periods } from './periods.component';
 import { Tooltip } from './tooltip';
 import { Days } from './days';
-import { Elements } from './elements.interface';
+import { Elements } from '../model/elements.interface';
 
 export class TimelanesGraphic {
 
