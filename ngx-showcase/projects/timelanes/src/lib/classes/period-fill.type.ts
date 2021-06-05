@@ -1,3 +1,3 @@
-// export type PeriodFillStyle = 'none' 
-//     | 'line-solid'
-//     | 'line-dashed'
+export type PeriodFillStyle = 'none' 
+    | 'line-solid'
+    | 'line-dashed'

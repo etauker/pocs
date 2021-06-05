@@ -1,4 +1,4 @@
-// export interface Elements {
-//     svg: string;
-//     tooltip: string;
-// }
+export interface Elements {
+    svg: string;
+    tooltip: string;
+}

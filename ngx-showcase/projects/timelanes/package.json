@@ -8,5 +8,8 @@
     "@angular/common": "^6.0.0-rc.0 || ^6.0.0",
     "@angular/core": "^6.0.0-rc.0 || ^6.0.0",
     "moment": "^2.29.1"
+  },
+  "dependencies": {
+    "d3": "^6.7.0"
   }
 }
