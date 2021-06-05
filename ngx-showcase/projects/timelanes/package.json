@@ -1,0 +1,12 @@
+{
+  "name": "@etauker/ngx-timelanes",
+  "description": "A simple D3 timelane chart",
+  "version": "0.0.1",
+  "author": "etauker",
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/common": "^6.0.0-rc.0 || ^6.0.0",
+    "@angular/core": "^6.0.0-rc.0 || ^6.0.0",
+    "moment": "^2.29.1"
+  }
+}
