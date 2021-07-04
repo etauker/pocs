@@ -1,13 +1,19 @@
 import { NgModule } from '@angular/core';
 import { TimelanesComponent } from './timelanes/timelanes.component';
 import { TimelanesGraphicComponent } from './timelanes-graphic/timelanes-graphic.component';
-import { MockDataService } from './mock-data/mock-data.service';
-
+// import { TooltipComponent } from './tooltip/tooltip.component';
+export * from './model/period.interface';
 @NgModule({
   imports: [
   ],
-  declarations: [TimelanesComponent, TimelanesGraphicComponent],
-  exports: [TimelanesComponent],
-  providers: [MockDataService]
+  declarations: [
+    TimelanesComponent,
+    TimelanesGraphicComponent,
+    // TooltipComponent
+  ],
+  exports: [
+    TimelanesComponent
+  ],
+  providers: []
 })
 export class TimelanesModule { }

@@ -27,7 +27,7 @@ export class Tooltip {
     }
 
     /**
-     * Update the location of thetooltip on the screen.
+     * Update the location of the tooltip on the screen.
      */
     public move(x: number, y: number): void {
         this.selection.style('top', y + 'px').style('left', x + 'px');

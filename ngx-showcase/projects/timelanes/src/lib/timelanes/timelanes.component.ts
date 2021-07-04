@@ -1,6 +1,7 @@
 // import * as moment_ from 'moment';
 // const moment = moment_;
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { Period } from '../model/period.interface';
 // import { TimelanesGraphic } from './classes/timelanes-graphic';
 
 @Component({
@@ -9,6 +10,9 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./timelanes.component.css']
 })
 export class TimelanesComponent implements OnInit {
+
+  @Input('data')
+  periods: Period[] = [];
 
   constructor() { }
 

@@ -1,10 +1,9 @@
 import * as moment_ from 'moment';
 const moment = moment_;
 
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
 import { TimelanesGraphic } from '../classes/timelanes-graphic';
 import { Period } from '../model/period.interface';
-import { MockDataService } from '../mock-data/mock-data.service';
 
 @Component({
   selector: 'lib-timelanes-graphic',
@@ -13,14 +12,18 @@ import { MockDataService } from '../mock-data/mock-data.service';
 })
 export class TimelanesGraphicComponent implements OnInit, AfterViewInit {
 
-  constructor(private mockDataService: MockDataService) { }
+  @Input()
+  periods: Period[] = [];
+
+  constructor() { }
 
   ngAfterViewInit() {
 
     // needed to calculate percent-based SVG height and width
     setTimeout(() => this.init(), 10);
+
   }
-  
+
   ngOnInit() { }
 
   private init() {
@@ -29,12 +32,12 @@ export class TimelanesGraphicComponent implements OnInit, AfterViewInit {
 
 
     // format data
-    const PERIODS: Period[] = this.mockDataService.getMockPeriods();
+    // const PERIODS: Period[] = this.mockDataService.getMockPeriods();
 
     const timeline = new TimelanesGraphic({
       svg: 'visual',
       tooltip: 'tooltip'
-    }, PERIODS, {
+    }, this.periods, {
       timelaneStyle: {
           backgroundColour: 'wheat',
 

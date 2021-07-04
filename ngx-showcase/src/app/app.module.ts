@@ -4,7 +4,8 @@ import { NgModule } from '@angular/core';
 import { TimelanesModule } from 'timelanes';
 
 import { AppComponent } from './app.component';
-// import { TimelanesModule } from '../../projects/timelanes/src/lib/timelanes.module';
+import { MockDataService } from './mock-data/mock-data.service';
+
 
 @NgModule({
   declarations: [
@@ -14,7 +15,7 @@ import { AppComponent } from './app.component';
     BrowserModule,
     TimelanesModule,
   ],
-  providers: [],
+  providers: [MockDataService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

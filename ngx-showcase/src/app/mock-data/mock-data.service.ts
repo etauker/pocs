@@ -2,7 +2,8 @@ import * as moment_ from 'moment';
 const moment = moment_;
 
 import { Injectable } from '@angular/core';
-import { Period } from 'timelanes/lib/model/period.interface';
+import { Period } from 'timelanes';
+
 
 @Injectable({
   providedIn: 'root'
