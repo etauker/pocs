@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import { Period, PeriodInternal } from '../model/period.interface';
 import { TimelanesConfiguration } from '../model/timelanes-configuration.interface';
 import { Periods } from './periods.component';
-import { Tooltip } from './tooltip';
+import { TooltipComponent } from '../tooltip/tooltip.component';
 import { Days } from './days';
 import { Elements } from '../model/elements.interface';
 
@@ -18,7 +18,7 @@ export class TimelanesGraphic {
 
     private days: Days;
     private periods: Periods;
-    private tooltip: Tooltip;
+    private tooltip: TooltipComponent;
 
     public scaleX: d3.ScaleLinear<number, number, never>;
     public scaleY: d3.ScaleBand<string>;
@@ -53,7 +53,7 @@ export class TimelanesGraphic {
             .padding(0.3)
 
         // format sub-objects
-        this.tooltip = new Tooltip(ids.tooltip);
+        this.tooltip = new TooltipComponent(ids.tooltip);
         this.days = new Days(this, daysSelection, days, configuration && configuration.timelaneStyle ? configuration.timelaneStyle : undefined);
         this.periods = new Periods(this, periodSelection, periods, this.tooltip);
         this.styleContainer(this.container, configuration);

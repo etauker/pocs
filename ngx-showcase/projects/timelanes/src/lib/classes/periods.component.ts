@@ -2,10 +2,11 @@ import * as d3 from 'd3';
 import * as moment_ from 'moment';
 const moment = moment_;
 
-import { Tooltip } from './tooltip';
+// import { Tooltip } from './tooltip';
 import { Annotation, AnnotationInternal } from '../model/annotation.interface';
 import { Period, PeriodInternal } from '../model/period.interface';
 import { TimelanesGraphic } from './timelanes-graphic';
+import { TooltipComponent } from '../tooltip/tooltip.component';
 
 export class Periods {
 
@@ -17,9 +18,9 @@ export class Periods {
     private selection: d3.Selection<d3.EnterElement, PeriodInternal, d3.BaseType, any>;
     private data: PeriodInternal[];
     private component: TimelanesGraphic;
-    private tooltip: Tooltip;
+    private tooltip: TooltipComponent;
 
-    constructor(parent: TimelanesGraphic, selection: d3.Selection<d3.BaseType, any, d3.BaseType, any>, data: Period[], tooltip: Tooltip) {
+    constructor(parent: TimelanesGraphic, selection: d3.Selection<d3.BaseType, any, d3.BaseType, any>, data: Period[], tooltip: TooltipComponent) {
         this.component = parent;
         this.tooltip = tooltip;
         this.data = data.map(period => this.processPeriod(period));
